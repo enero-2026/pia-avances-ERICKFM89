@@ -74,3 +74,15 @@ app.post("/login", (req, res) => {
 app.listen(3001, () => {
   console.log("Servidor corriendo en puerto 3001");
 });
+app.get("/versiones/:sistema", (req, res) => {
+  const { sistema } = req.params;
+
+  db.query(
+    "SELECT version FROM versiones WHERE sistema = ?",
+    [sistema],
+    (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.json(result);
+    }
+  );
+});
