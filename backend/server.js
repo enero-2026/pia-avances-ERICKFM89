@@ -23,7 +23,7 @@ db.connect(err => {
   }
 });
 
-// 📝 REGISTRO
+//////////////////// REGISTRO ////////////////////
 app.post("/register", async (req, res) => {
   const { email, password } = req.body;
 
@@ -33,7 +33,7 @@ app.post("/register", async (req, res) => {
     db.query(
       "INSERT INTO users (email, password) VALUES (?, ?)",
       [email, hashedPassword],
-      (err, result) => {
+      (err) => {
         if (err) {
           if (err.code === "ER_DUP_ENTRY") {
             return res.json({ success: false, message: "Usuario ya existe" });
@@ -49,7 +49,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// 🔐 LOGIN
+//////////////////// LOGIN ////////////////////
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -71,9 +71,7 @@ app.post("/login", (req, res) => {
   });
 });
 
-app.listen(3001, () => {
-  console.log("Servidor corriendo en puerto 3001");
-});
+//////////////////// VERSIONES ////////////////////
 app.get("/versiones/:sistema", (req, res) => {
   const { sistema } = req.params;
 
@@ -85,4 +83,64 @@ app.get("/versiones/:sistema", (req, res) => {
       res.json(result);
     }
   );
+});
+
+//////////////////// GUARDAR CLIENTE ////////////////////
+app.post("/clientes", (req, res) => {
+  const {
+    NombreCliente,
+    NumeroCliente,
+    RFC,
+    RegimenFiscal,
+    Telefono,
+    Contabilidad,
+    Bancos,
+    Nominas,
+    Comercial,
+    ContabilidadVersion,
+    BancosVersion,
+    NominasVersion,
+    ComercialVersion
+  } = req.body;
+
+  db.query(
+    `INSERT INTO clientes 
+    (NombreCliente, NumeroCliente, RFC, RegimenFiscal, Telefono,
+     Contabilidad, Bancos, Nominas, Comercial,
+     ContabilidadVersion, BancosVersion, NominasVersion, ComercialVersion)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      NombreCliente,
+      NumeroCliente,
+      RFC,
+      RegimenFiscal,
+      Telefono,
+      Contabilidad,
+      Bancos,
+      Nominas,
+      Comercial,
+      ContabilidadVersion,
+      BancosVersion,
+      NominasVersion,
+      ComercialVersion
+    ],
+    (err) => {
+      if (err) return res.status(500).send(err);
+
+      res.json({ success: true, message: "Cliente guardado" });
+    }
+  );
+});
+
+//////////////////// OBTENER CLIENTES ////////////////////
+app.get("/clientes", (req, res) => {
+  db.query("SELECT * FROM clientes", (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.json(result);
+  });
+});
+
+//////////////////// SERVIDOR ////////////////////
+app.listen(3001, () => {
+  console.log("Servidor corriendo en puerto 3001");
 });

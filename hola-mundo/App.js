@@ -1,20 +1,124 @@
-import { useState } from "react"; 
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { useState } from "react";
+import {
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, Alert, ScrollView
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
+
+// NAVIGATION
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+
+const Tab = createBottomTabNavigator();
+const BASE_URL = "http://192.168.15.112:3001";
 
 export default function App() {
 
-  const [screen, setScreen] = useState("login");
+  const [logged, setLogged] = useState(false);
+
+  if (!logged) return <LoginScreen onLogin={() => setLogged(true)} />;
+
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: "#800020" },
+          headerTintColor: "#fff",
+          headerTitleAlign: "center", // ✅ CENTRADO
+          tabBarStyle: { backgroundColor: "#800020" },
+          tabBarActiveTintColor: "#fff",
+          tabBarInactiveTintColor: "#f2c6cc"
+        }}
+      >
+        <Tab.Screen name="Ver Clientes" component={ClientesScreen} />
+
+        <Tab.Screen 
+          name="Agregar Cliente" 
+          component={AgregarScreen}
+          options={{ title: "Agregar" }} // 👈 SOLO MUESTRA "Agregar"
+        />
+
+        <Tab.Screen name="Editar Cliente" component={EditarScreen} />
+
+        <Tab.Screen name="Salir">
+          {() => <LogoutScreen onLogout={() => setLogged(false)} />}
+        </Tab.Screen>
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
+
+//////////////////// LOGIN ////////////////////
+function LoginScreen({ onLogin }) {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [showForm, setShowForm] = useState(false);
+  const login = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
 
-  // DATOS
+      const data = await res.json();
+
+      if (data.success) onLogin();
+      else Alert.alert(data.message);
+
+    } catch {
+      Alert.alert("Error de conexión");
+    }
+  };
+
+  return (
+    <View style={styles.centerContent}>
+      <Text style={styles.title}>MACONTROL</Text>
+
+      <TextInput placeholder="Correo" onChangeText={setEmail} style={styles.input} />
+      <TextInput placeholder="Contraseña" secureTextEntry onChangeText={setPassword} style={styles.input} />
+
+      <TouchableOpacity style={styles.button} onPress={login}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+//////////////////// CLIENTES ////////////////////
+function ClientesScreen() {
+  return (
+    <View style={styles.centerContent}>
+      <Text style={styles.title}>Ver Clientes</Text>
+      <Text style={{ color: "#555" }}>
+        Aquí irá la lista (FlatList después)
+      </Text>
+    </View>
+  );
+}
+
+//////////////////// EDITAR ////////////////////
+function EditarScreen() {
+  return (
+    <View style={styles.centerContent}>
+      <Text style={styles.title}>Editar Cliente</Text>
+      <Text style={{ color: "#555" }}>
+        Aquí podrás editar clientes
+      </Text>
+    </View>
+  );
+}
+
+//////////////////// AGREGAR ////////////////////
+function AgregarScreen() {
+  const [rfc, setRfc] = useState("");
+  const [regimenFiscal, setRegimenFiscal] = useState("");
+  const [telefono, setTelefono] = useState("");
+
   const [companyName, setCompanyName] = useState("");
   const [companyNumber, setCompanyNumber] = useState("");
 
-  // SISTEMAS
   const [contabilidad, setContabilidad] = useState(false);
   const [contaVersion, setContaVersion] = useState("");
   const [contaOptions, setContaOptions] = useState([]);
@@ -31,9 +135,6 @@ export default function App() {
   const [comercialVersion, setComercialVersion] = useState("");
   const [comercialOptions, setComercialOptions] = useState([]);
 
-  const BASE_URL = "http://192.168.15.112:3001";
-
-  // 🔹 Obtener versiones
   const getVersions = async (sistema, setter) => {
     try {
       const res = await fetch(`${BASE_URL}/versiones/${sistema}`);
@@ -44,45 +145,11 @@ export default function App() {
     }
   };
 
-  // 🔹 LOGIN
-  const login = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-      if (data.success) setScreen("home");
-      else Alert.alert(data.message);
-    } catch {
-      Alert.alert("Error de conexión");
-    }
-  };
-
-  // 🔹 REGISTER
-  const register = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        Alert.alert("Usuario registrado");
-        setScreen("login");
-      } else Alert.alert(data.message);
-    } catch {
-      Alert.alert("Error de conexión");
-    }
-  };
-
-  // 🔹 GUARDAR CLIENTE
   const saveClient = async () => {
+      if (!companyName || !companyNumber || !rfc || !telefono) {
+    Alert.alert("Completa los datos obligatorios");
+    return;
+    }
 
     if (!companyName || !companyNumber) {
       Alert.alert("Completa los datos");
@@ -92,21 +159,22 @@ export default function App() {
     try {
       const res = await fetch(`${BASE_URL}/clientes`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          NombreCliente: companyName,
-          NumeroCliente: companyNumber,
-          Contabilidad: contabilidad,
-          Bancos: bancos,
-          Nominas: nominas,
-          Comercial: comercial,
-          ContabilidadVersion: contaVersion,
-          BancosVersion: bancosVersion,
-          NominasVersion: nominasVersion,
-          ComercialVersion: comercialVersion
-        })
+        NombreCliente: companyName,
+        NumeroCliente: companyNumber,
+        RFC: rfc,
+        RegimenFiscal: regimenFiscal,
+        Telefono: telefono,
+        Contabilidad: contabilidad,
+        Bancos: bancos,
+        Nominas: nominas,
+        Comercial: comercial,
+        ContabilidadVersion: contaVersion,
+        BancosVersion: bancosVersion,
+        NominasVersion: nominasVersion,
+        ComercialVersion: comercialVersion
+      })
       });
 
       const data = await res.json();
@@ -114,23 +182,20 @@ export default function App() {
       if (data.success) {
         Alert.alert("Cliente guardado");
 
-        // limpiar
         setCompanyName("");
         setCompanyNumber("");
+        setRfc("");              
+        setRegimenFiscal("");    
+        setTelefono("");         
 
         setContabilidad(false);
         setContaVersion("");
-
         setBancos(false);
         setBancosVersion("");
-
         setNominas(false);
         setNominasVersion("");
-
         setComercial(false);
         setComercialVersion("");
-
-        setShowForm(false);
       }
 
     } catch {
@@ -139,212 +204,154 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.formContainer}>
 
-      <View style={styles.header}>
-        <Text style={styles.headerText}>MACONTROL</Text>
-      </View>
+      <Text style={styles.title}>Agregar Cliente</Text>
 
-      <View style={styles.content}>
+      <Text style={styles.label}>Nombre de la empresa</Text>
+      <TextInput
+        placeholder="Nombre empresa"
+        style={styles.input}
+        value={companyName}
+        onChangeText={setCompanyName}
+      />
+      <Text style={styles.label}>Nombre de la empresa</Text>
+      <TextInput
+        placeholder="Número empresa"
+        style={styles.input}
+        value={companyNumber}
+        onChangeText={setCompanyNumber}
+      />
+            <Text style={styles.label}>RFC</Text>
+      <TextInput
+        placeholder="RFC"
+        style={styles.input}
+        value={rfc}
+        onChangeText={setRfc}
+      />
 
-        {/* LOGIN */}
-        {screen === "login" && (
-          <View style={styles.centerContent}>
-            <Text style={styles.title}>Login</Text>
+      <Text style={styles.label}>Régimen Fiscal</Text>
+      <TextInput
+        placeholder="Régimen Fiscal"
+        style={styles.input}
+        value={regimenFiscal}
+        onChangeText={setRegimenFiscal}
+      />
 
-            <TextInput placeholder="Correo" onChangeText={setEmail} style={styles.input} />
-            <TextInput placeholder="Contraseña" secureTextEntry onChangeText={setPassword} style={styles.input} />
+      <Text style={styles.label}>Número de contacto</Text>
+      <TextInput
+        placeholder="Número de contacto"
+        style={styles.input}
+        value={telefono}
+        onChangeText={setTelefono}
+        keyboardType="phone-pad"
+      />
 
-            <TouchableOpacity style={styles.button} onPress={login}>
-              <Text style={styles.buttonText}>Entrar</Text>
-            </TouchableOpacity>
+      {/* SISTEMAS (SIN CAMBIOS) */}
+      <Text style={styles.label}>Contabilidad</Text>
+      <SwitchButtons state={contabilidad} setState={(v) => {
+        setContabilidad(v);
+        if (v) getVersions("contabilidad", setContaOptions);
+      }} />
 
-            <TouchableOpacity onPress={() => setScreen("register")}>
-              <Text style={styles.registerText}>Registrarse</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+      {contabilidad && (
+        <Picker selectedValue={contaVersion} onValueChange={setContaVersion}>
+          <Picker.Item label="Selecciona versión" value="" />
+          {contaOptions.map((v, i) => (
+            <Picker.Item key={i} label={v.version} value={v.version} />
+          ))}
+        </Picker>
+      )}
 
-        {/* HOME */}
-        {screen === "home" && (
-          <View style={{ flex: 1, padding: 15 }}>
+      <Text style={styles.label}>Bancos</Text>
+      <SwitchButtons state={bancos} setState={(v) => {
+        setBancos(v);
+        if (v) getVersions("bancos", setBancosOptions);
+      }} />
 
-            {!showForm && (
-              <View style={styles.homeTop}>
-                <Text style={styles.title}>Bienvenido 👋</Text>
-              </View>
-            )}
+      {bancos && (
+        <Picker selectedValue={bancosVersion} onValueChange={setBancosVersion}>
+          <Picker.Item label="Selecciona versión" value="" />
+          {bancosOptions.map((v, i) => (
+            <Picker.Item key={i} label={v.version} value={v.version} />
+          ))}
+        </Picker>
+      )}
 
-            {showForm && (
-              <View>
-                <Text style={styles.title}>Agregar Cliente</Text>
+      <Text style={styles.label}>Nóminas</Text>
+      <SwitchButtons state={nominas} setState={(v) => {
+        setNominas(v);
+        if (v) getVersions("nominas", setNominasOptions);
+      }} />
 
-                <View style={styles.formContainer}>
+      {nominas && (
+        <Picker selectedValue={nominasVersion} onValueChange={setNominasVersion}>
+          <Picker.Item label="Selecciona versión" value="" />
+          {nominasOptions.map((v, i) => (
+            <Picker.Item key={i} label={v.version} value={v.version} />
+          ))}
+        </Picker>
+      )}
 
-                  {/* IZQUIERDA */}
-                  <View style={styles.leftColumn}>
-                    <Text style={styles.label}>Nombre de la empresa</Text>
-                    <TextInput style={styles.input} value={companyName} onChangeText={setCompanyName} />
+      <Text style={styles.label}>Comercial</Text>
+      <SwitchButtons state={comercial} setState={(v) => {
+        setComercial(v);
+        if (v) getVersions("comercial", setComercialOptions);
+      }} />
 
-                    <Text style={styles.label}>Número de empresa</Text>
-                    <TextInput style={styles.input} value={companyNumber} onChangeText={setCompanyNumber} />
-                  </View>
+      {comercial && (
+        <Picker selectedValue={comercialVersion} onValueChange={setComercialVersion}>
+          <Picker.Item label="Selecciona versión" value="" />
+          {comercialOptions.map((v, i) => (
+            <Picker.Item key={i} label={v.version} value={v.version} />
+          ))}
+        </Picker>
+      )}
 
-                  {/* DERECHA */}
-                  <View style={styles.rightColumn}>
+      <TouchableOpacity style={styles.button} onPress={saveClient}>
+        <Text style={styles.buttonText}>Guardar</Text>
+      </TouchableOpacity>
 
-                    {/* CONTABILIDAD */}
-                    <Text style={styles.label}>Contabilidad</Text>
-                    <View style={styles.switchRow}>
-                      <TouchableOpacity style={[styles.optionButton, contabilidad ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => {
-                          setContabilidad(true);
-                          getVersions("contabilidad", setContaOptions);
-                        }}>
-                        <Text style={contabilidad ? styles.optionTextActive : styles.optionText}>Sí</Text>
-                      </TouchableOpacity>
+    </ScrollView>
+  );
+}
 
-                      <TouchableOpacity style={[styles.optionButton, !contabilidad ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => setContabilidad(false)}>
-                        <Text style={!contabilidad ? styles.optionTextActive : styles.optionText}>No</Text>
-                      </TouchableOpacity>
-                    </View>
+//////////////////// SWITCH ////////////////////
+function SwitchButtons({ state, setState }) {
+  return (
+    <View style={styles.switchRow}>
+      <TouchableOpacity
+        style={[styles.optionButton, state && styles.optionActive]}
+        onPress={() => setState(true)}
+      >
+        <Text style={state ? styles.optionTextActive : styles.optionText}>Sí</Text>
+      </TouchableOpacity>
 
-                    {contabilidad && (
-                      <Picker selectedValue={contaVersion} onValueChange={setContaVersion}>
-                        <Picker.Item label="Selecciona versión" value="" />
-                        {contaOptions.map((v, i) => (
-                          <Picker.Item key={i} label={v.version} value={v.version} />
-                        ))}
-                      </Picker>
-                    )}
-
-                    {/* BANCOS */}
-                    <Text style={styles.label}>Bancos</Text>
-                    <View style={styles.switchRow}>
-                      <TouchableOpacity style={[styles.optionButton, bancos ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => {
-                          setBancos(true);
-                          getVersions("bancos", setBancosOptions);
-                        }}>
-                        <Text style={bancos ? styles.optionTextActive : styles.optionText}>Sí</Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity style={[styles.optionButton, !bancos ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => setBancos(false)}>
-                        <Text style={!bancos ? styles.optionTextActive : styles.optionText}>No</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {bancos && (
-                      <Picker selectedValue={bancosVersion} onValueChange={setBancosVersion}>
-                        <Picker.Item label="Selecciona versión" value="" />
-                        {bancosOptions.map((v, i) => (
-                          <Picker.Item key={i} label={v.version} value={v.version} />
-                        ))}
-                      </Picker>
-                    )}
-
-                    {/* NOMINAS */}
-                    <Text style={styles.label}>Nóminas</Text>
-                    <View style={styles.switchRow}>
-                      <TouchableOpacity style={[styles.optionButton, nominas ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => {
-                          setNominas(true);
-                          getVersions("nominas", setNominasOptions);
-                        }}>
-                        <Text style={nominas ? styles.optionTextActive : styles.optionText}>Sí</Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity style={[styles.optionButton, !nominas ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => setNominas(false)}>
-                        <Text style={!nominas ? styles.optionTextActive : styles.optionText}>No</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {nominas && (
-                      <Picker selectedValue={nominasVersion} onValueChange={setNominasVersion}>
-                        <Picker.Item label="Selecciona versión" value="" />
-                        {nominasOptions.map((v, i) => (
-                          <Picker.Item key={i} label={v.version} value={v.version} />
-                        ))}
-                      </Picker>
-                    )}
-
-                    {/* COMERCIAL */}
-                    <Text style={styles.label}>Comercial</Text>
-                    <View style={styles.switchRow}>
-                      <TouchableOpacity style={[styles.optionButton, comercial ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => {
-                          setComercial(true);
-                          getVersions("comercial", setComercialOptions);
-                        }}>
-                        <Text style={comercial ? styles.optionTextActive : styles.optionText}>Sí</Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity style={[styles.optionButton, !comercial ? styles.optionActive : styles.optionInactive]}
-                        onPress={() => setComercial(false)}>
-                        <Text style={!comercial ? styles.optionTextActive : styles.optionText}>No</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {comercial && (
-                      <Picker selectedValue={comercialVersion} onValueChange={setComercialVersion}>
-                        <Picker.Item label="Selecciona versión" value="" />
-                        {comercialOptions.map((v, i) => (
-                          <Picker.Item key={i} label={v.version} value={v.version} />
-                        ))}
-                      </Picker>
-                    )}
-
-                  </View>
-                </View>
-
-                <TouchableOpacity style={styles.button} onPress={saveClient}>
-                  <Text style={styles.buttonText}>Guardar</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* MENÚ */}
-            <View style={styles.bottomMenu}>
-              <TouchableOpacity style={styles.menuButton}>
-                <Text style={styles.menuText}>Ver Clientes</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuButton} onPress={() => setShowForm(!showForm)}>
-                <Text style={styles.menuText}>Agregar Cliente</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuButton}>
-                <Text style={styles.menuText}>Editar Cliente</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuButton} onPress={() => setScreen("login")}>
-                <Text style={styles.menuText}>Salir</Text>
-              </TouchableOpacity>
-            </View>
-
-          </View>
-        )}
-      </View>
+      <TouchableOpacity
+        style={[styles.optionButton, !state && styles.optionActive]}
+        onPress={() => setState(false)}
+      >
+        <Text style={!state ? styles.optionTextActive : styles.optionText}>No</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
+//////////////////// LOGOUT ////////////////////
+function LogoutScreen({ onLogout }) {
+  return (
+    <View style={styles.centerContent}>
+      <Text style={styles.title}>Cerrar sesión</Text>
+
+      <TouchableOpacity style={styles.button} onPress={onLogout}>
+        <Text style={styles.buttonText}>Salir</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+//////////////////// STYLES ////////////////////
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-
-  header: {
-    height: 60,
-    backgroundColor: "#800020",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-
-  headerText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
-
-  content: { flex: 1 },
 
   centerContent: {
     flex: 1,
@@ -353,16 +360,16 @@ const styles = StyleSheet.create({
     padding: 20
   },
 
+  formContainer: {
+    padding: 15,
+    paddingBottom: 40
+  },
+
   title: {
-    fontSize: 26,
+    fontSize: 24,
     marginBottom: 20,
     fontWeight: "bold",
     textAlign: "center"
-  },
-
-  label: {
-    fontWeight: "bold",
-    marginBottom: 5
   },
 
   input: {
@@ -374,53 +381,23 @@ const styles = StyleSheet.create({
     borderRadius: 5
   },
 
+  label: {
+    fontWeight: "bold",
+    marginTop: 10
+  },
+
   button: {
     backgroundColor: "#800020",
     padding: 12,
     borderRadius: 5,
     alignItems: "center",
-    marginTop: 10
+    marginTop: 20
   },
 
-  buttonText: { color: "#fff", fontWeight: "bold" },
-
-  homeTop: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center"
-  },
-
-  bottomMenu: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 65,
-    flexDirection: "row",
-    backgroundColor: "#800020"
-  },
-
-  menuButton: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRightWidth: 1,
-    borderRightColor: "#a00030"
-  },
-
-  menuText: {
+  buttonText: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 12
+    fontWeight: "bold"
   },
-
-  formContainer: {
-    flexDirection: "row",
-    gap: 10
-  },
-
-  leftColumn: { flex: 1 },
-  rightColumn: { flex: 1 },
 
   switchRow: {
     flexDirection: "row",
@@ -429,7 +406,7 @@ const styles = StyleSheet.create({
   },
 
   optionButton: {
-    flex: 0.5,
+    flex: 1,
     paddingVertical: 8,
     borderWidth: 1,
     borderColor: "#800020",
@@ -439,10 +416,6 @@ const styles = StyleSheet.create({
 
   optionActive: {
     backgroundColor: "#800020"
-  },
-
-  optionInactive: {
-    backgroundColor: "#fff"
   },
 
   optionText: {
