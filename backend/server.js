@@ -97,10 +97,14 @@ app.post("/clientes", (req, res) => {
     Bancos,
     Nominas,
     Comercial,
+    SQLServer,
+    Windows,
     ContabilidadVersion,
     BancosVersion,
     NominasVersion,
-    ComercialVersion
+    ComercialVersion,
+    SQLServerVersion,
+    WindowsVersion
   } = req.body;
 
   db.query(
@@ -110,19 +114,23 @@ app.post("/clientes", (req, res) => {
      ContabilidadVersion, BancosVersion, NominasVersion, ComercialVersion)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      NombreCliente,
-      NumeroCliente,
-      RFC,
-      RegimenFiscal,
-      Telefono,
-      Contabilidad,
-      Bancos,
-      Nominas,
-      Comercial,
-      ContabilidadVersion,
-      BancosVersion,
-      NominasVersion,
-      ComercialVersion
+    NombreCliente,
+    NumeroCliente,
+    RFC,
+    RegimenFiscal,
+    Telefono,
+    Contabilidad,
+    Bancos,
+    Nominas,
+    Comercial,
+    SQLServer,
+    Windows,
+    ContabilidadVersion,
+    BancosVersion,
+    NominasVersion,
+    ComercialVersion,
+    SQLServerVersion,
+    WindowsVersion
     ],
     (err) => {
       if (err) return res.status(500).send(err);

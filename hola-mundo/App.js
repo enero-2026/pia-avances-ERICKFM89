@@ -112,6 +112,12 @@ function EditarScreen() {
 
 //////////////////// AGREGAR ////////////////////
 function AgregarScreen() {
+  const [sqlServerVersion, setSqlServerVersion] = useState("");
+  const [sqlServerOptions, setSqlServerOptions] = useState([]);
+
+  const [windowsVersion, setWindowsVersion] = useState("");
+  const [windowsOptions, setWindowsOptions] = useState([]);
+
   const [rfc, setRfc] = useState("");
   const [regimenFiscal, setRegimenFiscal] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -151,10 +157,10 @@ function AgregarScreen() {
     return;
     }
 
-    if (!companyName || !companyNumber) {
-      Alert.alert("Completa los datos");
-      return;
-    }
+      if (!sqlServerVersion || !windowsVersion) {
+        Alert.alert("Selecciona versiones de SQL Server y Windows");
+        return;
+      }
 
     try {
       const res = await fetch(`${BASE_URL}/clientes`, {
@@ -173,7 +179,9 @@ function AgregarScreen() {
         ContabilidadVersion: contaVersion,
         BancosVersion: bancosVersion,
         NominasVersion: nominasVersion,
-        ComercialVersion: comercialVersion
+        ComercialVersion: comercialVersion,
+        SQLServerVersion: sqlServerVersion,
+        WindowsVersion: windowsVersion
       })
       });
 
@@ -307,6 +315,31 @@ function AgregarScreen() {
           ))}
         </Picker>
       )}
+        <Text style={styles.label}>SQL Server</Text>
+
+        <Picker
+          selectedValue={sqlServerVersion}
+          onValueChange={setSqlServerVersion}
+          onFocus={() => getVersions("sqlserver", setSqlServerOptions)}
+        >
+          <Picker.Item label="Selecciona versión" value="" />
+          {sqlServerOptions.map((v, i) => (
+            <Picker.Item key={i} label={v.version} value={v.version} />
+          ))}
+        </Picker>
+
+        <Text style={styles.label}>Windows</Text>
+
+        <Picker
+          selectedValue={windowsVersion}
+          onValueChange={setWindowsVersion}
+          onFocus={() => getVersions("windows", setWindowsOptions)}
+        >
+          <Picker.Item label="Selecciona versión" value="" />
+          {windowsOptions.map((v, i) => (
+            <Picker.Item key={i} label={v.version} value={v.version} />
+          ))}
+        </Picker>
 
       <TouchableOpacity style={styles.button} onPress={saveClient}>
         <Text style={styles.buttonText}>Guardar</Text>
