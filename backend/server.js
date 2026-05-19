@@ -351,3 +351,164 @@ app.get("/clientes-lista", (req, res) => {
   );
 });
 
+//////////////////// DASHBOARD ////////////////////
+
+app.get("/dashboard", (req, res) => {
+
+  const queries = {
+
+    // CLIENTES
+    clientes:
+      "SELECT COUNT(*) AS total FROM clientes",
+
+    // SISTEMAS
+    contabilidad:
+      "SELECT COUNT(*) AS total FROM clientes WHERE Contabilidad = 1",
+
+    bancos:
+      "SELECT COUNT(*) AS total FROM clientes WHERE Bancos = 1",
+
+    nominas:
+      "SELECT COUNT(*) AS total FROM clientes WHERE Nominas = 1",
+
+    comercial:
+      "SELECT COUNT(*) AS total FROM clientes WHERE Comercial = 1",
+
+    // WINDOWS
+    windows10:
+      "SELECT COUNT(*) AS total FROM clientes WHERE WindowsVersion LIKE '%Windows 10%'",
+
+    windows11:
+      "SELECT COUNT(*) AS total FROM clientes WHERE WindowsVersion LIKE '%Windows 11%'",
+
+    windowsServer:
+      "SELECT COUNT(*) AS total FROM clientes WHERE WindowsVersion LIKE '%Server%'",
+
+    // SQL SERVER
+    sql2016:
+      "SELECT COUNT(*) AS total FROM clientes WHERE SQLServerVersion LIKE '%2016%'",
+
+    sql2019:
+      "SELECT COUNT(*) AS total FROM clientes WHERE SQLServerVersion LIKE '%2019%'",
+
+    sql2022:
+      "SELECT COUNT(*) AS total FROM clientes WHERE SQLServerVersion LIKE '%2022%'"
+  };
+
+  let resultados = {};
+
+  //////////////////// CLIENTES ////////////////////
+
+  db.query(queries.clientes, (err, clientes) => {
+
+    if (err) return res.status(500).send(err);
+
+    resultados.clientes = clientes[0].total;
+
+    //////////////////// CONTABILIDAD ////////////////////
+
+    db.query(queries.contabilidad, (err, contabilidad) => {
+
+      if (err) return res.status(500).send(err);
+
+      resultados.contabilidad = contabilidad[0].total;
+
+      //////////////////// BANCOS ////////////////////
+
+      db.query(queries.bancos, (err, bancos) => {
+
+        if (err) return res.status(500).send(err);
+
+        resultados.bancos = bancos[0].total;
+
+        //////////////////// NOMINAS ////////////////////
+
+        db.query(queries.nominas, (err, nominas) => {
+
+          if (err) return res.status(500).send(err);
+
+          resultados.nominas = nominas[0].total;
+
+          //////////////////// COMERCIAL ////////////////////
+
+          db.query(queries.comercial, (err, comercial) => {
+
+            if (err) return res.status(500).send(err);
+
+            resultados.comercial = comercial[0].total;
+
+            //////////////////// WINDOWS 10 ////////////////////
+
+            db.query(queries.windows10, (err, windows10) => {
+
+              if (err) return res.status(500).send(err);
+
+              resultados.windows10 = windows10[0].total;
+
+              //////////////////// WINDOWS 11 ////////////////////
+
+              db.query(queries.windows11, (err, windows11) => {
+
+                if (err) return res.status(500).send(err);
+
+                resultados.windows11 = windows11[0].total;
+
+                //////////////////// WINDOWS SERVER ////////////////////
+
+                db.query(queries.windowsServer, (err, windowsServer) => {
+
+                  if (err) return res.status(500).send(err);
+
+                  resultados.windowsServer = windowsServer[0].total;
+
+                  //////////////////// SQL 2016 ////////////////////
+
+                  db.query(queries.sql2016, (err, sql2016) => {
+
+                    if (err) return res.status(500).send(err);
+
+                    resultados.sql2016 = sql2016[0].total;
+
+                    //////////////////// SQL 2019 ////////////////////
+
+                    db.query(queries.sql2019, (err, sql2019) => {
+
+                      if (err) return res.status(500).send(err);
+
+                      resultados.sql2019 = sql2019[0].total;
+
+                      //////////////////// SQL 2022 ////////////////////
+
+                      db.query(queries.sql2022, (err, sql2022) => {
+
+                        if (err) return res.status(500).send(err);
+
+                        resultados.sql2022 = sql2022[0].total;
+
+                        //////////////////// RESPUESTA FINAL ////////////////////
+
+                        res.json(resultados);
+
+                      });
+
+                    });
+
+                  });
+
+                });
+
+              });
+
+            });
+
+          });
+
+        });
+
+      });
+
+    });
+
+  });
+
+});

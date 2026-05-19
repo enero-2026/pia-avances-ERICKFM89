@@ -12,9 +12,11 @@ import { Picker } from "@react-native-picker/picker";
 // NAVIGATION
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import HomeScreen from "./HomeScreen";
 
 const Tab = createBottomTabNavigator();
-const BASE_URL = "http://192.168.100.113:3001";
+const BASE_URL = "http://192.168.15.112:3001";
+
 
 export default function App() {
 
@@ -23,6 +25,8 @@ export default function App() {
   if (!logged) return <LoginScreen onLogin={() => setLogged(true)} />;
 
   return (
+
+    
 <NavigationContainer>
   <Tab.Navigator
     screenOptions={({ route }) => ({
@@ -45,7 +49,10 @@ export default function App() {
       tabBarIcon: ({ color, size }) => {
         let iconName;
 
-        if (route.name === "Ver Clientes") {
+        if (route.name === "Home") {
+          iconName = "home";
+        }
+        else if (route.name === "Ver Clientes") {
           iconName = "people";
         }
 
@@ -71,6 +78,11 @@ export default function App() {
       }
     })}
   >
+
+    <Tab.Screen
+      name="Home"
+      component={HomeScreen}
+    />
 
     <Tab.Screen
       name="Ver Clientes"
@@ -344,7 +356,6 @@ useFocusEffect(
                     </Text>
                   )}
 
-                  {/* SERVIDOR */}
                   <Text style={styles.section}>
                     Servidor
                   </Text>
