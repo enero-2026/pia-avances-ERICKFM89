@@ -20,7 +20,7 @@ import {
 
 const screenWidth = Dimensions.get("window").width;
 
-const BASE_URL = "http://192.168.15.112:3001";
+const BASE_URL = "http://192.168.100.113:3001";
 
 export default function HomeScreen() {
 
