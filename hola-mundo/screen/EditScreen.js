@@ -360,6 +360,7 @@ const deleteClient = () => {
     <ScrollView contentContainerStyle={styles.formContainer}>
 
       <Text style={styles.label}>Seleccionar Cliente</Text>
+      <View style={styles.pickerContainer}>
 
       <Picker
         selectedValue={clienteSeleccionado}
@@ -369,13 +370,15 @@ const deleteClient = () => {
           if (value !== null) {
             cargarCliente(value);
           }
-        }}
+        }}style={styles.picker}
       >
         <Picker.Item label="Selecciona un cliente" value={null} />
         {clientesOptions.map((c, i) => (
           <Picker.Item key={i} label={`${c.NombreCliente} (${c.NumeroCliente})`} value={c.id} />
         ))}
       </Picker>
+
+      </View>
 
       {clienteId && (
         <>
@@ -663,6 +666,35 @@ const styles = StyleSheet.create({
     gap: 8
   },
 
+  pickerContainer: {
+  backgroundColor: "#fff",
+  borderRadius: 14,
+  borderWidth: 1,
+  borderColor: "#ddd",
+  marginBottom: 18,
+
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+
+  shadowOpacity: 0.05,
+  shadowRadius: 4,
+  elevation: 2
+},
+
+picker: {
+  width: "100%"
+},
+
+  rowButtons: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 15
+  },
+  
     });
+    
 
     export default EditarScreen;
