@@ -245,89 +245,89 @@ useFocusEffect(
 
                   <View style={styles.rowWrap}>
 
-                    {item.Contabilidad && (
-                      <View style={styles.block}>
-                        <Text style={styles.blockTitle}>
-                          Contabilidad
-                        </Text>
+{item.Contabilidad == 1 && (
+  <View style={styles.block}>
+    <Text style={styles.blockTitle}>
+      Contabilidad
+    </Text>
 
-                        <Text>
-                          {item.ContabilidadVersion || "Sin versión"}
-                        </Text>
-                      </View>
-                    )}
+    <Text>
+      {item.ContabilidadVersion || "Sin versión"}
+    </Text>
+  </View>
+)}
 
-                    {item.Bancos && (
-                      <View style={styles.block}>
-                        <Text style={styles.blockTitle}>
-                          Bancos
-                        </Text>
+{item.Bancos == 1 && (
+  <View style={styles.block}>
+    <Text style={styles.blockTitle}>
+      Bancos
+    </Text>
 
-                        <Text>
-                          {item.BancosVersion || "Sin versión"}
-                        </Text>
-                      </View>
-                    )}
+    <Text>
+      {item.BancosVersion || "Sin versión"}
+    </Text>
+  </View>
+)}
 
-                    {item.Nominas && (
-                      <View style={styles.block}>
-                        <Text style={styles.blockTitle}>
-                          Nóminas
-                        </Text>
+{item.Nominas == 1 && (
+  <View style={styles.block}>
+    <Text style={styles.blockTitle}>
+      Nóminas
+    </Text>
 
-                        <Text>
-                          {item.NominasVersion || "Sin versión"}
-                        </Text>
-                      </View>
-                    )}
+    <Text>
+      {item.NominasVersion || "Sin versión"}
+    </Text>
+  </View>
+)}
 
-                    {item.Comercial && (
-                      <View style={styles.block}>
-                        <Text style={styles.blockTitle}>
-                          Comercial
-                        </Text>
+{item.Comercial == 1 && (
+  <View style={styles.block}>
+    <Text style={styles.blockTitle}>
+      Comercial
+    </Text>
 
-                        <Text>
-                          {item.ComercialVersion || "Sin versión"}
-                        </Text>
-                      </View>
-                    )}
+    <Text>
+      {item.ComercialVersion || "Sin versión"}
+    </Text>
+  </View>
+)}
 
-                  </View>
+</View>
 
-                  {!item.Contabilidad &&
-                   !item.Bancos &&
-                   !item.Nominas &&
-                   !item.Comercial && (
-                    <Text style={styles.emptyText}>
-                      No tiene sistemas registrados
-                    </Text>
-                  )}
+{item.Contabilidad != 1 &&
+ item.Bancos != 1 &&
+ item.Nominas != 1 &&
+ item.Comercial != 1 && (
+  <Text style={styles.emptyText}>
+    No tiene sistemas registrados
+  </Text>
+)}
 
-                  <Text style={styles.section}>
-                    Servidor
-                  </Text>
+<Text style={styles.section}>
+  Servidor
+</Text>
 
-                  <View style={styles.rowWrap}>
+<View style={styles.rowWrap}>
 
-                    <View style={styles.block}>
-                      <Text style={styles.blockTitle}>
-                        SQL Server
-                      </Text>
+  <View style={styles.block}>
+    <Text style={styles.blockTitle}>
+      SQL Server
+    </Text>
 
-                      <Text>
-                        {item.SQLServerVersion || "No definido"}
-                      </Text>
-                    </View>
+    <Text>
+      {item.SQLServerVersion || "No definido"}
+    </Text>
+  </View>
 
-                    <View style={styles.block}>
-                      <Text style={styles.blockTitle}>
-                        Windows
-                      </Text>
+  <View style={styles.block}>
+    <Text style={styles.blockTitle}>
+      Windows
+    </Text>
 
-                      <Text>
-                        {item.WindowsVersion || "No definido"}
-                      </Text>
+    <Text>
+      {item.WindowsVersion || "No definido"}
+    </Text>
                     </View>
 
                   </View>

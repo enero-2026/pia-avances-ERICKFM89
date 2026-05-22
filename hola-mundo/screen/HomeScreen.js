@@ -1,3 +1,5 @@
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import React, { useEffect, useState } from "react";
 
 import {
@@ -45,33 +47,54 @@ export default function HomeScreen() {
 
   });
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
+    setLoading(true);
     cargarDashboard();
-  }, []);
+  }, [])
+);
+const cargarDashboard = async () => {
 
-  const cargarDashboard = async () => {
+  try {
 
-    try {
+    const response = await fetch(
+      `${BASE_URL}/dashboard`
+    );
 
-      const response = await fetch(
-        `${BASE_URL}/dashboard`
-      );
+    const data = await response.json();
 
-      const data = await response.json();
+    setStats({
 
-      setStats(data);
+      clientes: data.clientes || 0,
 
-    } catch (error) {
+      contabilidad: data.contabilidad || 0,
+      bancos: data.bancos || 0,
+      nominas: data.nominas || 0,
+      comercial: data.comercial || 0,
 
-      console.log("ERROR DASHBOARD:", error);
+      windows10: data.windows10 || 0,
+      windows11: data.windows11 || 0,
+      windowsServer: data.windowsServer || 0,
 
-    } finally {
+      sql2016: data.sql2016 || 0,
+      sql2019: data.sql2019 || 0,
+      sql2022: data.sql2022 || 0
 
-      setLoading(false);
+    });
 
-    }
+  } catch (error) {
 
-  };
+    console.log("ERROR DASHBOARD:", error);
+
+    Alert.alert("Error cargando dashboard");
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
 
   const pieData = [
 
@@ -286,7 +309,6 @@ export default function HomeScreen() {
 
 
 
-{/* INFRAESTRUCTURA */}
 
 <View style={styles.infrastructureContainer}>
 
@@ -294,7 +316,6 @@ export default function HomeScreen() {
     Infraestructura
   </Text>
 
-  {/* SQL SERVER */}
 
   <View style={styles.infrastructureCardVertical}>
 
@@ -332,7 +353,6 @@ export default function HomeScreen() {
 
   </View>
 
-  {/* WINDOWS */}
 
   <View style={styles.infrastructureCardVertical}>
 

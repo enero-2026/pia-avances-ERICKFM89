@@ -140,33 +140,55 @@ function AgregarScreen( { navigation } ) {
     }
 
      try {
-      const res = await fetch(`${BASE_URL}/clientes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-        NombreCliente: companyName,
-        NumeroCliente: companyNumber,
-        RFC: rfc,
-        RegimenFiscalID: regimen,
-        Telefono: telefono,
-        Contabilidad: contabilidad,
-        Bancos: bancos,
-        Nominas: nominas,
-        Comercial: comercial,
-        ContabilidadVersion: contaVersion,
-        BancosVersion: bancosVersion,
-        NominasVersion: nominasVersion,
-        ComercialVersion: comercialVersion,
-        SQLServerVersion: sqlServerVersion,
-        WindowsVersion: windowsVersion
-      })
-      });
+    const formData = new FormData();
+
+    formData.append("NombreCliente", companyName);
+    formData.append("NumeroCliente", companyNumber);
+    formData.append("RFC", rfc);
+    formData.append("RegimenFiscalID", regimen);
+    formData.append("Telefono", telefono);
+
+    formData.append("Contabilidad", contabilidad ? 1 : 0);
+    formData.append("Bancos", bancos ? 1 : 0);
+    formData.append("Nominas", nominas ? 1 : 0);
+    formData.append("Comercial", comercial ? 1 : 0);
+
+    formData.append("ContabilidadVersion", contaVersion);
+    formData.append("BancosVersion", bancosVersion);
+    formData.append("NominasVersion", nominasVersion);
+    formData.append("ComercialVersion", comercialVersion);
+
+    formData.append("SQLServerVersion", sqlServerVersion);
+    formData.append("WindowsVersion", windowsVersion);
+
+    if (imagen) {
+
+  const filename = imagen.split("/").pop();
+
+  const match = /\.(\w+)$/.exec(filename);
+
+  const type = match
+    ? `image/${match[1]}`
+    : `image`;
+
+  formData.append("imagen", {
+    uri: imagen,
+    name: filename,
+    type
+  });
+}
+
+const res = await fetch(`${BASE_URL}/clientes`, {
+  method: "POST",
+  body: formData
+});
+
 
       const data = await res.json();
 
       if (data.success) {
         Alert.alert("Cliente guardado");
-        navigation.goBack();
+        navigation.navigate("Ver Clientes");
 
 
         setCompanyName("");
@@ -183,6 +205,8 @@ function AgregarScreen( { navigation } ) {
         setNominasVersion("");
         setComercial(false);
         setComercialVersion("");
+
+        setImagen(null);
       }
 
     } catch {
@@ -279,7 +303,8 @@ function AgregarScreen( { navigation } ) {
         style={styles.input}
         value={telefono}
         onChangeText={setTelefono}
-        keyboardType="phone-pad"
+        keyboardType="numeric"
+        maxLength={8}
       />
 
       <Text style={styles.label}>Contabilidad</Text>
@@ -433,7 +458,17 @@ const styles = StyleSheet.create({
     borderColor: "#800020",
     borderRadius: 30,
     alignItems: "center",
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3
+    
   },
 
   optionActive: {
