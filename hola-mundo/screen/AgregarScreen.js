@@ -268,20 +268,40 @@ const res = await fetch(`${BASE_URL}/clientes`, {
         style={styles.input}
         value={companyName}
         onChangeText={setCompanyName}
+        maxLength={60}
       />
       <Text style={styles.label}>Numero de la empresa</Text>
       <TextInput
         placeholder="Número empresa"
         style={styles.input}
         value={companyNumber}
-        onChangeText={setCompanyNumber}
+        onChangeText={(text) => {
+
+          const limpio = text.replace(/[^0-9]/g, "");
+
+          setCompanyNumber(limpio);
+
+        }}
+        keyboardType="numeric"
+        maxLength={6}
       />
             <Text style={styles.label}>RFC</Text>
       <TextInput
         placeholder="RFC"
         style={styles.input}
         value={rfc}
-        onChangeText={setRfc}
+        onChangeText={(text) => {
+
+          // MAYUSCULAS Y SIN ESPACIOS
+          const limpio = text
+            .toUpperCase()
+            .replace(/\s/g, "");
+
+          setRfc(limpio);
+
+        }}
+        autoCapitalize="characters"
+        maxLength={13}
       />
 
       <Text style={styles.label}>Régimen Fiscal</Text>
@@ -304,7 +324,7 @@ const res = await fetch(`${BASE_URL}/clientes`, {
         value={telefono}
         onChangeText={setTelefono}
         keyboardType="numeric"
-        maxLength={8}
+        maxLength={10}
       />
 
       <Text style={styles.label}>Contabilidad</Text>
